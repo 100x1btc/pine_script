@@ -1,3 +1,4 @@
+
 //@version=5
 indicator(title='btc100x1_MACD', overlay=false, precision=8, timeframe='')
 
@@ -11,7 +12,7 @@ hist = macd - signal
 // PLOT
 plot(hist, title='Histogram', style=plot.style_columns, color=hist >= 0 ? hist[1] < hist ? #26A69A : #B2DFDB : hist[1] < hist ? #FFCDD2 : #EF5350)
 
-//OBV in line?
+//OBV in line? by traileriana
 change_1 = ta.change(close)
 obv_ = ta.cum(ta.change(close) > 0 ? volume : change_1 < 0 ? -volume : 0 * volume)
 
@@ -22,7 +23,7 @@ cc = c == o ? c : c / 3 * 2
 oo = o == c ? o : o / 3 * 2
 
 
-//ADX & DI
+//ADX & DI by BeikabuOyaji
 TrueRange = math.max(math.max(high - low, math.abs(high - nz(close[1]))), math.abs(low - nz(close[1])))
 DirectionalMovementPlus = high - nz(high[1]) > nz(low[1]) - low ? math.max(high - nz(high[1]), 0) : 0
 DirectionalMovementMinus = nz(low[1]) - low > high - nz(high[1]) ? math.max(nz(low[1]) - low, 0) : 0
