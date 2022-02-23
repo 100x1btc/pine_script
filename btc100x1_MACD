@@ -1,0 +1,57 @@
+//@version=5
+indicator(title='btc100x1_MACD', overlay=false, precision=8, timeframe='')
+
+// MACD
+fast_ma = ta.ema(close, 12)
+slow_ma = ta.ema(close, 26)
+macd = fast_ma - slow_ma
+signal = ta.ema(macd, 9)
+hist = macd - signal
+
+// PLOT
+plot(hist, title='Histogram', style=plot.style_columns, color=hist >= 0 ? hist[1] < hist ? #26A69A : #B2DFDB : hist[1] < hist ? #FFCDD2 : #EF5350)
+
+//OBV in line?
+change_1 = ta.change(close)
+obv_ = ta.cum(ta.change(close) > 0 ? volume : change_1 < 0 ? -volume : 0 * volume)
+
+c = math.sign(ta.change(ta.ema(close, 30)))
+o = math.sign(ta.change(ta.ema(obv_, 30)))
+
+cc = c == o ? c : c / 3 * 2
+oo = o == c ? o : o / 3 * 2
+
+
+//ADX & DI
+TrueRange = math.max(math.max(high - low, math.abs(high - nz(close[1]))), math.abs(low - nz(close[1])))
+DirectionalMovementPlus = high - nz(high[1]) > nz(low[1]) - low ? math.max(high - nz(high[1]), 0) : 0
+DirectionalMovementMinus = nz(low[1]) - low > high - nz(high[1]) ? math.max(nz(low[1]) - low, 0) : 0
+
+SmoothedTrueRange = 0.0
+SmoothedTrueRange := nz(SmoothedTrueRange[1]) - nz(SmoothedTrueRange[1]) / 14 + TrueRange
+
+SmoothedDirectionalMovementPlus = 0.0
+SmoothedDirectionalMovementPlus := nz(SmoothedDirectionalMovementPlus[1]) - nz(SmoothedDirectionalMovementPlus[1]) / 14 + DirectionalMovementPlus
+
+SmoothedDirectionalMovementMinus = 0.0
+SmoothedDirectionalMovementMinus := nz(SmoothedDirectionalMovementMinus[1]) - nz(SmoothedDirectionalMovementMinus[1]) / 14 + DirectionalMovementMinus
+
+DIPlus = SmoothedDirectionalMovementPlus / SmoothedTrueRange * 100
+DIMinus = SmoothedDirectionalMovementMinus / SmoothedTrueRange * 100
+DX = math.abs(DIPlus - DIMinus) / (DIPlus + DIMinus) * 100
+ADX = ta.sma(DX, 14)
+
+ema200 = ta.ema(close, 200)
+ma144 = ta.sma(close, 144)
+
+//Rules
+
+bullobv = cc > 0.8 and oo > 0.8
+bearobv = cc < -0.8 and oo < -0.8
+
+DIbull = DIPlus > DIMinus
+DIbear = DIPlus < DIMinus
+
+
+plotshape(bullobv and DIbull, style=shape.square, color=color.new(color=color.lime, transp=0), location=location.bottom, size=size.tiny)
+plotshape(bearobv and DIbear, style=shape.square, color=color.new(color=color.red, transp=0), location=location.bottom, size=size.tiny)
